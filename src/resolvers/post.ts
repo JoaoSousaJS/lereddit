@@ -21,6 +21,25 @@ export class PostResolver {
     const newPost = new Post()
     newPost.title = title
     await Post.save(newPost)
-    return Post.findOne({ id: newPost.id })
+    return newPost
+  }
+
+  @Mutation(() => Post, { nullable: true })
+  async updatePost (
+    @Arg('id') id: number,
+      @Arg('title', () => String, { nullable: true }) title: string
+  ): Promise<Post | undefined | null> {
+    const post = await Post.findOne({ id })
+
+    if (!post) {
+      return null
+    }
+
+    if (typeof title !== 'undefined') {
+      post.title = title
+      await Post.save(post)
+    }
+
+    return post
   }
 }

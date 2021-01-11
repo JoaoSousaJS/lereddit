@@ -40,7 +40,20 @@ let PostResolver = class PostResolver {
             const newPost = new Post_1.Post();
             newPost.title = title;
             yield Post_1.Post.save(newPost);
-            return Post_1.Post.findOne({ id: newPost.id });
+            return newPost;
+        });
+    }
+    updatePost(id, title) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const post = yield Post_1.Post.findOne({ id });
+            if (!post) {
+                return null;
+            }
+            if (typeof title !== 'undefined') {
+                post.title = title;
+                yield Post_1.Post.save(post);
+            }
+            return post;
         });
     }
 };
@@ -64,6 +77,14 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], PostResolver.prototype, "createPost", null);
+__decorate([
+    type_graphql_1.Mutation(() => Post_1.Post, { nullable: true }),
+    __param(0, type_graphql_1.Arg('id')),
+    __param(1, type_graphql_1.Arg('title', () => String, { nullable: true })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, String]),
+    __metadata("design:returntype", Promise)
+], PostResolver.prototype, "updatePost", null);
 PostResolver = __decorate([
     type_graphql_1.Resolver()
 ], PostResolver);
