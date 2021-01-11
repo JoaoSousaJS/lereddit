@@ -2,11 +2,13 @@ import 'reflect-metadata'
 import 'dotenv/config'
 import express from 'express'
 import { createConnection } from 'typeorm'
-import { Post } from './database/entity/Post'
+import { Post } from './database/entities/Post'
 import { ApolloServer } from 'apollo-server-express'
 import { buildSchema } from 'type-graphql'
-import { PostResolver } from './resolvers/post'
+import { PostResolver } from './resolvers/post/Post'
 import { HelloResolver } from './resolvers/Hello'
+import { User } from './database/entities/User'
+import { UserResolver } from './resolvers/user/user'
 
 createConnection({
   type: 'postgres',
@@ -18,13 +20,13 @@ createConnection({
   synchronize: true,
   logging: true,
   entities: [
-    Post
+    Post, User
   ]
 }).then(async connection => {
   const app = express()
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [HelloResolver,PostResolver],
+      resolvers: [HelloResolver,PostResolver, UserResolver],
       validate: false
     })
   })

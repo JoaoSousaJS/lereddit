@@ -16,11 +16,13 @@ require("reflect-metadata");
 require("dotenv/config");
 const express_1 = __importDefault(require("express"));
 const typeorm_1 = require("typeorm");
-const Post_1 = require("./database/entity/Post");
+const Post_1 = require("./database/entities/Post");
 const apollo_server_express_1 = require("apollo-server-express");
 const type_graphql_1 = require("type-graphql");
-const post_1 = require("./resolvers/post");
+const Post_2 = require("./resolvers/post/Post");
 const Hello_1 = require("./resolvers/Hello");
+const User_1 = require("./database/entities/User");
+const user_1 = require("./resolvers/user/user");
 typeorm_1.createConnection({
     type: 'postgres',
     host: 'localhost',
@@ -31,13 +33,13 @@ typeorm_1.createConnection({
     synchronize: true,
     logging: true,
     entities: [
-        Post_1.Post
+        Post_1.Post, User_1.User
     ]
 }).then((connection) => __awaiter(void 0, void 0, void 0, function* () {
     const app = express_1.default();
     const apolloServer = new apollo_server_express_1.ApolloServer({
         schema: yield type_graphql_1.buildSchema({
-            resolvers: [Hello_1.HelloResolver, post_1.PostResolver],
+            resolvers: [Hello_1.HelloResolver, Post_2.PostResolver, user_1.UserResolver],
             validate: false
         })
     });
