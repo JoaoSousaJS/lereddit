@@ -15,6 +15,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 require("reflect-metadata");
 require("dotenv/config");
 const express_1 = __importDefault(require("express"));
+const redis_1 = __importDefault(require("redis"));
+const express_session_1 = __importDefault(require("express-session"));
+const connect_redis_1 = __importDefault(require("connect-redis"));
 const typeorm_1 = require("typeorm");
 const Post_1 = require("./database/entities/Post");
 const apollo_server_express_1 = require("apollo-server-express");
@@ -23,6 +26,7 @@ const Post_2 = require("./resolvers/post/Post");
 const Hello_1 = require("./resolvers/Hello");
 const User_1 = require("./database/entities/User");
 const user_1 = require("./resolvers/user/user");
+const constants_1 = require("./constants");
 typeorm_1.createConnection({
     type: 'postgres',
     host: 'localhost',
@@ -37,11 +41,27 @@ typeorm_1.createConnection({
     ]
 }).then((connection) => __awaiter(void 0, void 0, void 0, function* () {
     const app = express_1.default();
+    const RedisStore = connect_redis_1.default(express_session_1.default);
+    const redisClient = redis_1.default.createClient();
+    app.use(express_session_1.default({
+        name: 'qid',
+        store: new RedisStore({ client: redisClient, disableTouch: true }),
+        cookie: {
+            maxAge: 1000 * 60 * 60 * 24 * 365 * 10,
+            httpOnly: true,
+            sameSite: 'lax',
+            secure: constants_1._prod_
+        },
+        saveUninitialized: false,
+        secret: process.env.REDIS_SESSION_SECRET,
+        resave: false
+    }));
     const apolloServer = new apollo_server_express_1.ApolloServer({
         schema: yield type_graphql_1.buildSchema({
             resolvers: [Hello_1.HelloResolver, Post_2.PostResolver, user_1.UserResolver],
             validate: false
-        })
+        }),
+        context: ({ req, res }) => ({ req, res })
     });
     console.log(connection);
     apolloServer.applyMiddleware({ app });
