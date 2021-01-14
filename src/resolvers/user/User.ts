@@ -47,7 +47,8 @@ export class UserResolver {
 
   @Mutation(() => UserResponse)
   async register (
-    @Arg('options') options: UsernamePasswordInput): Promise<UserResponse> {
+    @Arg('options') options: UsernamePasswordInput,
+      @Ctx() { req }: Context): Promise<UserResponse> {
     const userExists = await User.findOne({ username: options.username })
 
     if (userExists) {
@@ -81,6 +82,8 @@ export class UserResolver {
     newUser.password = hashedPassword
 
     await User.save(newUser)
+    // @ts-expect-error
+    req.session.userId = newUser.id
 
     return {
       user: newUser
