@@ -14,7 +14,6 @@ import { HelloResolver } from './resolvers/Hello'
 import { User } from './database/entities/User'
 import { UserResolver } from './resolvers/user/user'
 import { _prod_ } from './constants'
-import { Context } from './types'
 
 createConnection({
   type: 'postgres',
@@ -55,7 +54,7 @@ createConnection({
       resolvers: [HelloResolver,PostResolver, UserResolver],
       validate: false
     }),
-    context: ({ req, res }): Context => ({ req, res })
+    context: ({ req, res }) => ({ req, res })
   })
 
   apolloServer.applyMiddleware({
