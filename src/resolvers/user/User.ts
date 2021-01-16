@@ -80,6 +80,8 @@ export class UserResolver {
     const newUser = new User()
     newUser.username = options.username
     newUser.password = hashedPassword
+    newUser.createdAt = new Date()
+    newUser.updatedAt = new Date()
 
     await User.save(newUser)
     // @ts-expect-error
