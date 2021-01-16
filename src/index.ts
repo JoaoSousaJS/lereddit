@@ -4,6 +4,7 @@ import express from 'express'
 import redis from 'redis'
 import session from 'express-session'
 import connectRedis from 'connect-redis'
+import cors from 'cors'
 import { createConnection } from 'typeorm'
 import { Post } from './database/entities/Post'
 import { ApolloServer } from 'apollo-server-express'
@@ -27,11 +28,15 @@ createConnection({
   entities: [
     Post, User
   ]
-}).then(async connection => {
+}).then(async () => {
   const app = express()
   const RedisStore = connectRedis(session)
   const redisClient = redis.createClient()
 
+  app.use(cors({
+    origin: 'http://localhost:3000',
+    credentials: true
+  }))
   app.use(session({
     name: 'qid',
     store: new RedisStore({ client: redisClient, disableTouch: true }),
@@ -53,9 +58,10 @@ createConnection({
     context: ({ req, res }): Context => ({ req, res })
   })
 
-  console.log(connection)
-
-  apolloServer.applyMiddleware({ app })
+  apolloServer.applyMiddleware({
+    app,
+    cors: false
+  })
   app.listen(4000, () => {
     console.log('server started on 4000')
   })
