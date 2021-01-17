@@ -13,7 +13,7 @@ import { PostResolver } from './resolvers/post/Post'
 import { HelloResolver } from './resolvers/Hello'
 import { User } from './database/entities/User'
 import { UserResolver } from './resolvers/user/user'
-import { _prod_ } from './constants'
+import { COOKIE_NAME, _prod_ } from './constants'
 
 createConnection({
   type: 'postgres',
@@ -37,7 +37,7 @@ createConnection({
     credentials: true
   }))
   app.use(session({
-    name: 'qid',
+    name: COOKIE_NAME,
     store: new RedisStore({ client: redisClient, disableTouch: true }),
     cookie: {
       maxAge: 1000 * 60 * 60 * 24 * 365 * 10,
