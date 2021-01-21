@@ -11,9 +11,10 @@ import { ApolloServer } from 'apollo-server-express'
 import { buildSchema } from 'type-graphql'
 import { PostResolver } from './resolvers/post/Post'
 import { HelloResolver } from './resolvers/Hello'
-import { User } from './database/entities/User'
+import { User } from './database/entities/Users'
 import { UserResolver } from './resolvers/user/user'
 import { COOKIE_NAME, _prod_ } from './constants'
+import path from 'path'
 
 createConnection({
   type: 'postgres',
@@ -26,7 +27,8 @@ createConnection({
   logging: true,
   entities: [
     Post, User
-  ]
+  ],
+  migrations: [path.join(__dirname, './database/migrations/*')]
 }).then(async () => {
   const app = express()
   const RedisStore = connectRedis(session)

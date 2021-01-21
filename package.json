@@ -6,12 +6,15 @@
    "scripts": {
       "watch": "tsc -w",
       "dev": "nodemon dist/index.js",
-      "dev2": "nodemon --exec ts-node src/index.ts",
       "start": "ts-node src/index.ts",
       "start2": "ts-node src/index.ts",
       "test": "echo \"Error: no test specified\" && exit 1",
-      "typeorm": "node --require ts-node/register ./node_modules/typeorm/cli.js",
-      "migration:create": "typeorm migration:create --dir src/database/migration"
+      "typeorm": "-r tsconfig-paths/register ./node_modules/typeorm/cli --config ./ormconfig.json",
+      "typeorm:migrate": "typeorm migration:generate -n",
+      "migration:create": "typeorm migration:create --dir src/database/migration",
+      "migration:generate": "typeorm migration:generate --dir src/database/migration",
+      "add-migration": "ts-node ./node_modules/typeorm/cli.js migration:generate -n",
+      "update-database": "ts-node ./node_modules/typeorm/cli.js migration:run"
    },
    "keywords": [],
    "author": "",
