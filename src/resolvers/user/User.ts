@@ -7,6 +7,7 @@ import { User } from '../../database/entities/Users'
 import { UsernamePasswordInput } from './UsernamePasswordInput'
 import { validateRegister } from '../../utils/validateRegister'
 import { sendEmail } from '../../utils/sendEmail'
+import { getConnection } from 'typeorm'
 
 @ObjectType()
 class FieldError {
@@ -82,7 +83,7 @@ export class UserResolver {
   @Arg('email') email: string,
     @Ctx() { req, redis }: Context
   ) {
-    const user = await User.findOne({ email })
+    const user = await User.findOne({ where: { email } })
 
     if (!user) {
       return true
@@ -106,8 +107,7 @@ export class UserResolver {
       return null
     }
     // @ts-expect-error
-    const user = await User.findOne({ id: req.session.userId })
-    return user
+    return User.findOne({ id: req.session.userId })
   }
 
   @Mutation(() => UserResponse)
@@ -121,19 +121,20 @@ export class UserResolver {
     }
 
     const hashedPassword = await argon2.hash(options.password)
-    const newUser = new User()
-    newUser.username = options.username
-    newUser.password = hashedPassword
-    newUser.email = options.email
-    newUser.createdAt = new Date()
-    newUser.updatedAt = new Date()
 
-    await User.save(newUser)
+    const result = await getConnection().createQueryBuilder().insert().into(User).values(
+      {
+        username: options.username,
+        email: options.email,
+        password: hashedPassword
+      }
+    ).returning('*').execute()
+    const user = result.raw[0]
     // @ts-expect-error
-    req.session.userId = newUser.id
+    req.session.userId = user.id
 
     return {
-      user: newUser
+      user
     }
   }
 
@@ -142,7 +143,7 @@ export class UserResolver {
     @Arg('usernameOrEmail') usernameOrEmail: string,
       @Arg('password') password: string,
       @Ctx() { req }: Context): Promise<UserResponse> {
-    const user = await User.findOneOrFail(usernameOrEmail.includes('@') ? { email: usernameOrEmail } : { username: usernameOrEmail })
+    const user = await User.findOne(usernameOrEmail.includes('@') ? { email: usernameOrEmail } : { username: usernameOrEmail })
 
     if (!user) {
       return {

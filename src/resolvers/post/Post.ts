@@ -18,10 +18,7 @@ export class PostResolver {
   @Mutation(() => Post)
   async createPost (
     @Arg('title', () => String) title: string): Promise<Post | undefined> {
-    const newPost = new Post()
-    newPost.title = title
-    await Post.save(newPost)
-    return newPost
+    return Post.create({ title }).save()
   }
 
   @Mutation(() => Post, { nullable: true })
@@ -36,8 +33,7 @@ export class PostResolver {
     }
 
     if (typeof title !== 'undefined') {
-      post.title = title
-      await Post.save(post)
+      await Post.update({ id }, { title })
     }
 
     return post
